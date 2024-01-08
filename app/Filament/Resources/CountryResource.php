@@ -17,7 +17,15 @@ class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-flag';
+
+    protected static ?string $navigationLabel = 'Country';
+    protected static ?string $modelLabel = 'Country';
+    protected static ?string $navigationGroup = 'System Management';
+
+    protected static ?int $navigationSort = 1;
+
+    // protected static ?string $slug = 'country';
 
     public static function form(Form $form): Form
     {
@@ -29,7 +37,7 @@ class CountryResource extends Resource
                 Forms\Components\TextInput::make('code')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('phone_code')
+                Forms\Components\TextInput::make('phonecode')
                     ->tel()
                     ->required()
                     ->maxLength(255),
@@ -44,7 +52,7 @@ class CountryResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('code')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('phone_code')
+                Tables\Columns\TextColumn::make('phonecode')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

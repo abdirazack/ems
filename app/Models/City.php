@@ -23,5 +23,15 @@ class City extends Model
     {
         return $this->hasMany(Employee::class);
     }   
+
+    public function scopeSearch($query, $searchTerm)
+    {
+        return $query->where('name', 'like', '%' . $searchTerm . '%');
+    }
+
+    public function country() : BelongsTo
+    {
+        return $this->state->country();
+    }
     
 }
