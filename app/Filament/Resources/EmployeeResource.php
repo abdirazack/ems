@@ -3,11 +3,16 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use App\Models\City;
 use Filament\Tables;
+use App\Models\State;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use App\Models\Employee;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Collection;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeeResource\Pages;
@@ -50,31 +55,43 @@ class EmployeeResource extends Resource
                             ->label('Country')
                             ->required()
                             ->native(false)
-                    ->lazy()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set) {
+                                $set('state_id', null);
+                                $set('city_id', null);
+                            })
                             ->searchable(),
                         Forms\Components\Select::make('state_id')
-                        ->label('State')
+                            ->label('State')
                             ->native(false)
-                            ->lazy()
+                            ->live()
+                            ->preload()
                             ->searchable()
                             ->required()
-                            ->relationship('state', 'name'),
+                            ->options(
+                                fn (Get $get): Collection => State::query()
+                                    ->where('country_id', $get('country_id'))->pluck('name', 'id')
+                            )
+                            ->afterStateUpdated(fn (Set $set) => $set('city_id', null)),
                         Forms\Components\Select::make('city_id')
-                        ->label('City')
+                            ->label('City')
                             ->native(false)
-                            ->lazy()
+                            ->live()
+                            ->preload()
                             ->searchable()
                             ->required()
-                            ->relationship('city', 'name'),
+                            ->options(
+                                fn (Get $get): Collection => City::query()
+                                    ->where('state_id', $get('state_id'))->pluck('name', 'id')
+                            ),
                         Forms\Components\Select::make('department_id')
-                        ->label('Department')
+                            ->label('Department')
                             ->native(false)
-                            ->lazy()
+                            ->preload()
                             ->searchable()
                             ->required()
-                            ->columnSpanFull()
                             ->relationship('department', 'name'),
-                    ])->columns(3),
+                    ])->columns(2),
 
                 Section::make('Other Information')
                     ->description('This is the other information of the employee.')
@@ -101,29 +118,39 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('country_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('state_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('city_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('department_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('first_name')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('middle_name')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('last_name')
+                    ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('country.name')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('state.name')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('city.name')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('department.name')
+                    ->numeric()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('address')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('zip_code')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('birth_date')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_hired')
@@ -148,6 +175,7 @@ class EmployeeResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

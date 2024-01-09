@@ -12,7 +12,7 @@ class City extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $fillable = ['name', 'state_id'];
+    protected $guarded = [];
 
     public function state() : BelongsTo
     {
@@ -31,7 +31,7 @@ class City extends Model
 
     public function country() : BelongsTo
     {
-        return $this->state->country();
+        return $this->belongsTo(Country::class);
     }
     
 }

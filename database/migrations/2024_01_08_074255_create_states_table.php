@@ -14,8 +14,15 @@ return new class extends Migration
         Schema::create('states', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('country_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('country_id')->index();
+            $table->string('country_code');
+            $table->string('fips_code')->nullable();
+            $table->string('iso2');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamps();
+            $table->boolean('flag')->default(0);
+            $table->text('wikiDataId')->nullable();
             $table->softDeletes();
 
         });

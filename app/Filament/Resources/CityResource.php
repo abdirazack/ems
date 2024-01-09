@@ -9,7 +9,6 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -30,14 +29,28 @@ class CityResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('state_id')
-                    ->relationship('state', 'name')
-                    ->preload()
-                    ->native(false)
-                    ->searchable()
-                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->maxLength(255),
+                Forms\Components\Select::make('state_id')
+                    ->relationship('state', 'name')
+                    ->required(),
+                Forms\Components\TextInput::make('state_code')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Select::make('country_id')
+                    ->relationship('country', 'name')
+                    ->required(),
+                Forms\Components\TextInput::make('country_code')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('latitude')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('longitude')
+                    ->maxLength(255),
+                Forms\Components\Toggle::make('flag')
+                    ->required(),
+                Forms\Components\TextInput::make('wikiDataId')
                     ->maxLength(255),
             ]);
     }
@@ -46,13 +59,36 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('state.country.name')
-                    ->sortable()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('country.name')
+                    ->label('Country Name')
+                    ->numeric()
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('state.name')
+                    ->label('State Name')
+                    ->searchable()
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('state_code')
+                ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->label('State Code')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('City Name')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('country_code')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('latitude')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('longitude')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -62,6 +98,12 @@ class CityResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('flag')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('wikiDataId')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -73,6 +115,7 @@ class CityResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

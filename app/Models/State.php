@@ -12,7 +12,7 @@ class State extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $fillable = ['name', 'country_id'];
+    protected $guarded = [];
 
     public function country() : BelongsTo
     {
