@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CountryResource\Pages;
-use App\Filament\Resources\CountryResource\RelationManagers;
-use App\Models\Country;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Country;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\CountryResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CountryResource\RelationManagers;
 
 class CountryResource extends Resource
 {
@@ -30,69 +34,98 @@ class CountryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Country Name')
+                Section::make('Country Info')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('name')
+                            ->label('Country Name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('capital')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+                Section::make('Currency')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('currency')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('currency_symbol')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+                Section::make('Country Codes')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('phonecode')
+                            ->tel()
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('iso3')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('iso2')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('wikiDataId')
+                            ->maxLength(65535),
+                        TextInput::make('tld')
+                            ->required()
+                            ->maxLength(255),
+                        Toggle::make('flag')
+                            ->required(),
+                    ]),
+                Section::make('Region and Locations')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('region')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('subregion')
+                            ->required()
+                            ->maxLength(255),
 
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('iso3')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('iso2')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phonecode')
-                    ->tel()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('capital')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('currency')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('currency_symbol')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('tld')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('native')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('region')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('subregion')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('flag')
-                    ->required(),
-                Forms\Components\Textarea::make('timezones')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('translations')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('latitude')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('longitude')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('emoji')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('emojiU')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('wikiDataId')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                        TextInput::make('latitude')
+                            ->required()
+                            ->maxLength(65535),
+                        TextInput::make('longitude')
+                            ->required()
+                            ->maxLength(65535)
+
+                    ]),
+
+                Section::make('Emojis')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('emoji')
+                            ->required()
+                            ->maxLength(65535),
+                        TextInput::make('emojiU')
+                            ->required()
+                            ->maxLength(65535),
+
+                    ]),
+
+                Section::make('Others')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('timezones')
+                            ->required()
+                            ->maxLength(65535),
+                        TextInput::make('translations')
+                            ->maxLength(65535),
+                        TextInput::make('native')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ]),
+
+
+
+
+
+
+
             ])->columns(3);
     }
 

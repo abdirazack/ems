@@ -30,29 +30,50 @@ class StateResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('country_code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('fips_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('iso2')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('latitude')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('longitude')
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('flag')
-                    ->required(),
-                Forms\Components\Textarea::make('wikiDataId')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+
+                // section 1
+                Forms\Components\Section::make('State Info')
+                    ->columns(2)
+                    ->Schema([
+                        Forms\Components\Select::make('country_id')
+                            ->relationship('country', 'name')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('country_code')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('fips_code')
+                            ->maxLength(255),
+                    ]),
+
+                Forms\Components\Group::make()
+                    ->columns(2)
+                    ->schema([
+                        // section 2
+                        Forms\Components\Section::make('Extra Info')
+                            ->Schema([
+                                Forms\Components\TextInput::make('latitude')
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('longitude')
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('iso2')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('wikiDataId')
+                                    ->maxLength(65535),
+
+                            ])->columns(2),
+                        Forms\Components\Toggle::make('flag')
+                            ->required(),
+                    ])->columnSpanFull(),
+
+
             ]);
     }
 

@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CityResource\Pages;
-use App\Filament\Resources\CityResource\RelationManagers;
-use App\Models\City;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\City;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\CityResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CityResource\RelationManagers;
 
 class CityResource extends Resource
 {
@@ -29,29 +33,57 @@ class CityResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('state_id')
-                    ->relationship('state', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('state_code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('country_id')
-                    ->relationship('country', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('country_code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('latitude')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('longitude')
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('flag')
-                    ->required(),
-                Forms\Components\TextInput::make('wikiDataId')
-                    ->maxLength(255),
+
+                Section::make('City Information')
+                    ->columns(1)
+                    ->Schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+
+                    ]),
+
+                Section::make('Country & State')
+                    ->columns(2)
+                    ->Schema([
+                        Select::make('country_id')
+                            ->relationship('country', 'name')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        TextInput::make('country_code')
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('state_id')
+                            ->relationship('state', 'name')
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        TextInput::make('state_code')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+
+                Section::make('Locations')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('latitude')
+                            ->maxLength(255),
+                        TextInput::make('longitude')
+                            ->maxLength(255),
+                    ]),
+
+                Section::make('Others')
+                    ->columns(2)
+                    ->Schema([
+                        TextInput::make('wikiDataId')
+                            ->maxLength(255),
+                        Toggle::make('flag')
+                            ->required(),
+                    ]),
+
             ]);
     }
 
@@ -70,7 +102,7 @@ class CityResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('state_code')
-                ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->label('State Code')
                     ->searchable(),
