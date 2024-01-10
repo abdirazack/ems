@@ -11,9 +11,14 @@ use Filament\Forms\Set;
 use App\Models\Employee;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use Illuminate\Support\Collection;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Section;
+use Filament\Tables\Filters\Indicator;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeeResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -170,7 +175,51 @@ class EmployeeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()
+                    ->native(false),
+                SelectFilter::make('department_id')
+                    ->relationship('department', 'name')
+                    ->native(false)
+                    ->searchable()
+                    ->preload()
+                    ->indicator('Filtering By Department')
+                    ->label('Department'),
+                Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from')
+                        ->label('Created From')
+                        ->native(false),
+                        DatePicker::make('created_until')
+                        ->label('Created Until')
+                        ->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                 
+                        if ($data['from'] ?? null) {
+                            $indicators[] = Indicator::make('Created from ' . Carbon::parse($data['from'])->toFormattedDateString())
+                                ->removeField('from');
+                        }
+                 
+                        if ($data['until'] ?? null) {
+                            $indicators[] = Indicator::make('Created until ' . Carbon::parse($data['until'])->toFormattedDateString())
+                                ->removeField('until');
+                        }
+                 
+                        return $indicators;
+                    })
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
