@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\CountryResource\RelationManagers;
+namespace App\Filament\Resources\StateResource\RelationManagers;
 
 use Carbon\Carbon;
 use Filament\Forms;
@@ -10,6 +10,7 @@ use App\Models\State;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
+use App\Filament\Resources\EmployeeResource\Pages;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Filament\Tables\Filters\Filter;
@@ -21,7 +22,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
-use App\Filament\Resources\EmployeeResource\Pages;
 
 class EmployeesRelationManager extends RelationManager
 {
@@ -232,9 +232,9 @@ class EmployeesRelationManager extends RelationManager
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\DetachBulkAction::make(),
                 ]),
             ]);
+
     }
 
     public static function getPages(): array
@@ -245,5 +245,13 @@ class EmployeesRelationManager extends RelationManager
             'view' => Pages\ViewEmployee::route('/{record}'),
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

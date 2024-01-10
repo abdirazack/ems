@@ -113,9 +113,11 @@ class CountryResource extends Resource
                     ->columns(2)
                     ->Schema([
                         TextInput::make('timezones')
+                            ->json()
                             ->required()
                             ->maxLength(65535),
                         TextInput::make('translations')
+                            ->json()
                             ->maxLength(65535),
                         TextInput::make('native')
                             ->maxLength(255)
