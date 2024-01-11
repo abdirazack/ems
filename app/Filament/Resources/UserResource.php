@@ -17,6 +17,8 @@ use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
 
+
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -24,6 +26,18 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Users';
     protected static ?string $navigationGroup = 'User Managemnt';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    // the count
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor() : ?string
+    {
+        return  'success';
+    }
 
     public static function form(Form $form): Form
     {

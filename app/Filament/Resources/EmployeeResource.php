@@ -13,11 +13,15 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Collection;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Filters\Indicator;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\DatePicker;
+use Filament\GlobalSearch\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeeResource\Pages;
@@ -32,6 +36,63 @@ class EmployeeResource extends Resource
 
     protected static ?string $navigationLabel = 'Employee';
     protected static ?string $navigationGroup = 'Employee Managemnt';
+
+    protected static ?string $recordTitleAttribute = 'first_name';
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->last_name;
+    }
+
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'first_name',
+            'middle_name',
+            'last_name',
+        ];
+    }
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'First Name' => $record->first_name,
+            'Department' => $record->department->name,
+            'City' => $record->city->name,
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['department', 'city']);
+    }
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return EmployeeResource::getUrl('view', ['record' => $record]);
+    }
+
+    public static function getGlobalSearchResultActions(Model $record): array
+    {
+        return [
+            Action::make('edit')
+                ->url(static::getUrl('edit', ['record' => $record])),
+            Action::make('view')
+                ->url(static::getUrl('view', ['record' => $record])),
+        ];
+    }
+
+    // the count
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor() : ?string
+    {
+        return  'success';
+    }
+
+    
 
     public static function form(Form $form): Form
     {
@@ -187,11 +248,11 @@ class EmployeeResource extends Resource
                 Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from')
-                        ->label('Created From')
-                        ->native(false),
+                            ->label('Created From')
+                            ->native(false),
                         DatePicker::make('created_until')
-                        ->label('Created Until')
-                        ->native(false),
+                            ->label('Created Until')
+                            ->native(false),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -206,17 +267,17 @@ class EmployeeResource extends Resource
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                 
+
                         if ($data['from'] ?? null) {
                             $indicators[] = Indicator::make('Created from ' . Carbon::parse($data['from'])->toFormattedDateString())
                                 ->removeField('from');
                         }
-                 
+
                         if ($data['until'] ?? null) {
                             $indicators[] = Indicator::make('Created until ' . Carbon::parse($data['until'])->toFormattedDateString())
                                 ->removeField('until');
                         }
-                 
+
                         return $indicators;
                     })
 
@@ -224,7 +285,12 @@ class EmployeeResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->successNotification(
+                     Notification::make()
+                    ->success()
+                    ->title('Employee Deleted successfully!'),
+                ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
